@@ -1,1 +1,8 @@
-images/
+*
+*/
+*/*
+
+!README.md
+!LICENSE
+!init.sh
+!.gitignore

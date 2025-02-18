@@ -71,6 +71,6 @@ git_clone https://git.codelinaro.org/linaro/dcap/tf-a/trusted-firmware-a.git    
 git_clone https://github.com/tianocore/edk2-platforms.git                                 edk2-platforms      master          false     true
 git_clone https://github.com/tianocore/edk2.git                                           edk2                master          false     true
 git_clone https://gitlab.arm.com/linux-arm/linux-cca                                      linux               cca-full/v5+v7  true      false
-git_clone https://git.codelinaro.org/linaro/dcap/buildroot-external-cca.git               buildroot-external  master          false     false
+git_clone https://git.codelinaro.org/linaro/dcap/buildroot-external-cca.git               buildroot-external  main            false     false
 git_clone https://gitlab.com/buildroot.org/buildroot.git                                  buildroot           master          true      false
 git_clone https://gitlab.com/qemu-project/qemu.git                                        qemu                master          true      false
