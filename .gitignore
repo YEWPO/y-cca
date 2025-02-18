@@ -7,3 +7,4 @@
 !init.sh
 !.gitignore
 !Makefile
+!create_display_panes.sh
