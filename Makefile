@@ -31,12 +31,7 @@ tf-a: rmm
 	cp $(TF_A_DIR)/build/qemu_sbsa/debug/fip.bin $(EDK2_NON_OSI_DIR)/Platform/Qemu/Sbsa/
 
 edk2: tf-a
-	export PACKAGES_PATH=$(EDK2_PLAT_DIR):$(EDK2_NON_OSI_DIR):$(EDK2_DIR)
-	export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
-	. $(EDK2_DIR)/edksetup.sh
-	make -C $(EDK2_DIR)/BaseTools
-	build -b RELEASE -a AARCH64 -t GCC5 -D ENABLE_RME --pcd PcdUefiShellDefaultBootEnable=1 \
-		--pcd PcdShellDefaultDelay=0 -p $(EDK2_PLAT_DIR)/Platform/Qemu/SbsaQemu/SbsaQemu.dsc
+	./rmm_build.sh
 	truncate -s 256M Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH0.fd
 	truncate -s 256M Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH1.fd
 	cp Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH0.fd $(IMAGE_DIR)

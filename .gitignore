@@ -9,3 +9,4 @@
 !Makefile
 !create_display_panes.sh
 !check_tmux.sh
+!rmm_build.sh
