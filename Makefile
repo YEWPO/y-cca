@@ -41,7 +41,7 @@ linux:
 
 buildroot:
 	cd $(ROOT_DIR)/buildroot
-	make BR2_EXTERNAL=path/to/buildroot-external-cca/ cca_defconfig
+	make BR2_EXTERNAL=../buildroot-external/ cca_defconfig
 	make -j$(THREADS)
 	cp output/images/rootfs.ext4 ../images/
 	cp output/images/rootfs.cpio ../images/
