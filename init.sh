@@ -7,7 +7,33 @@
 #shallow: shallow clone
 #submodules: clone submodules
 function git_clone() {
-  echo a
+  if [ -d $2 ]; then
+    echo "Directory $2 already exists. Skipping clone."
+    return
+  fi
+
+  git_cmd="git clone --branch=$3"
+  if [ "$4" = true ]; then
+    git_cmd="$git_cmd --depth=1"
+  fi
+  git_cmd="$git_cmd $1 $2"
+
+  while [ ! -d $2 ]; do
+    echo "Cloning $1 into $2"
+    eval $git_cmd
+  done
+
+  if [ "$5" = true ]; then
+    echo "Cloning submodules for $2"
+    cd $2
+    while true; do
+      git submodule update --init --recursive
+      if [ $? -eq 0 ]; then
+        break
+      fi
+    done
+    cd ..
+  fi
 }
 
 
@@ -44,4 +70,3 @@ git_clone https://gitlab.arm.com/linux-arm/linux-cca                            
 git_clone https://git.codelinaro.org/linaro/dcap/buildroot-external-cca.git               buildroot-external  master          false     false
 git_clone https://gitlab.com/buildroot.org/buildroot.git                                  buildroot           master          true      false
 git_clone https://gitlab.com/qemu-project/qemu.git                                        qemu                master          true      false
-
