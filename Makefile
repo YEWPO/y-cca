@@ -17,8 +17,9 @@ IMAGE_DIR = $(ROOT_DIR)/images
 
 # Build the Softwares
 rmm:
-	cmake -S $(RMM_DIR)  -DCMAKE_BUILD_TYPE=Debug -DRMM_CONFIG=qemu_sbsa_defcfg -B build-sbsa
-	cmake -S $(RMM_DIR) --build build-sbsa
+	export CROSS_COMPILE=$(CROSS_COMPILE)
+	cmake -S $(RMM_DIR) -DCMAKE_BUILD_TYPE=Debug -DRMM_CONFIG=qemu_sbsa_defcfg -B $(RMM_DIR)/build-sbsa
+	cmake --build $(RMM_DIR)/build-sbsa
 	cp $(RMM_DIR)/build-sbsa/Debug/rmm.img $(IMAGE_DIR)
 
 tf-a: rmm
