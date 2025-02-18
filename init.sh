@@ -27,7 +27,11 @@ function git_clone() {
     echo "Cloning submodules for $2"
     cd $2
     while true; do
-      git submodule update --init --recursive
+      if [ $2 = "rmm" ]; then
+        git submodule update --init --recursive
+      else
+        git submodule update --init
+      fi
       if [ $? -eq 0 ]; then
         break
       fi
@@ -60,7 +64,7 @@ check_tool bison
 mkdir -p images/disks/virtual/
 
 #Git Repo Configuration
-#         repo                                                                            dir                 branch          shallow   submodules
+#         |repo                                                                           |dir                |branch         |shallow  |submodules
 git_clone https://github.com/YEWPO/y-rmm.git                                              rmm                 master          false     true
 git_clone https://github.com/tianocore/edk2-non-osi.git                                   edk2-non-osi        master          false     false
 git_clone https://git.codelinaro.org/linaro/dcap/tf-a/trusted-firmware-a.git              trusted-firmware-a  cca/v4          false     false
