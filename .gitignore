@@ -8,3 +8,4 @@
 !.gitignore
 !Makefile
 !create_display_panes.sh
+!check_tmux.sh

@@ -63,7 +63,7 @@ virt-disk: buildroot linux edk2
 	cp $(LINUX_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image
 	echo "mode 100 31\npci\nfs0:\Image root=/dev/vda console=hvc0\nreset -c" > $(IMAGE_DIR)/disks/virtual/startup.nsh
 
-run: virt-disk qemu buildroot
+build: virt-disk qemu buildroot
 	./create_display_panes.sh
 	$(QEMU_DIR)/build/qemu-system-aarch64 \
 		-machine sbsa-ref -m 8G \
@@ -84,6 +84,9 @@ run: virt-disk qemu buildroot
 		-device virtio-9p-pci,fsdev=shr0,mount_tag=shr0 \
 		-fsdev local,security_model=none,path=$(ROOT_DIR),id=shr0
 	tmux select-window -l
+
+run: build
+	./check_tmux.sh $(ROOT_DIR)
 
 # Clone needed repositories and install dependencies
 init:

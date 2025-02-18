@@ -54,6 +54,7 @@ function check_tool() {
 #Check tools installation
 check_tool git
 check_tool make
+check_tool tmux
 check_tool aarch64-linux-gnu-gcc
 check_tool cmake
 check_tool ninja
