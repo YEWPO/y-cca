@@ -57,7 +57,7 @@ virt-disk: buildroot linux edk2
 
 build: virt-disk qemu buildroot
 
-startup:
+run-only:
 	./scripts/create_display_panes.sh
 	$(QEMU_DIR)/build/qemu-system-aarch64 \
 		-machine sbsa-ref -m 8G \
@@ -76,10 +76,10 @@ startup:
 		-device virtio-serial-pci \
 		-device virtconsole,chardev=hvc1 \
 		-device virtio-9p-pci,fsdev=shr0,mount_tag=shr0 \
-		-fsdev local,security_model=none,path=$(ROOT_DIR),id=shr0
+		-fsdev local,security_model=none,path=$(ROOT_DIR),id=shr0 &
 	tmux select-window -l
 
-run: build
+run:
 	./scripts/check_tmux.sh $(ROOT_DIR)
 
 # Clone needed repositories and install dependencies

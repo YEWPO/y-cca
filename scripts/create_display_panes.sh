@@ -19,3 +19,5 @@ else
 fi
 
 tmux select-window -l
+
+sleep 2
