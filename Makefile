@@ -51,16 +51,14 @@ buildroot:
 	cp $(BUILDROOT_DIR)/output/images/rootfs.cpio $(IMAGE_DIR)
 
 qemu:
-	cd $(QEMU_DIR)
-	$(QEMU_DIR)/configure --target-list=aarch64-softmmu --enable-slirp --disable-docs
-	make -C $(QEMU_DIR) -j$(THREADS)
+	./scripts/qemu_build.sh
 
 virt-disk: buildroot linux edk2
 	cp $(LINUX_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image
 	echo "mode 100 31\npci\nfs0:\Image root=/dev/vda console=hvc0\nreset -c" > $(IMAGE_DIR)/disks/virtual/startup.nsh
 
 build: virt-disk qemu buildroot
-	./create_display_panes.sh
+	./scripts/create_display_panes.sh
 	$(QEMU_DIR)/build/qemu-system-aarch64 \
 		-machine sbsa-ref -m 8G \
 		-cpu max,x-rme=on,sme=off,pauth-impdef=on \
@@ -82,10 +80,10 @@ build: virt-disk qemu buildroot
 	tmux select-window -l
 
 run: build
-	./check_tmux.sh $(ROOT_DIR)
+	./scripts/check_tmux.sh $(ROOT_DIR)
 
 # Clone needed repositories and install dependencies
 init:
-	./init.sh
+	./scripts/init.sh
 
 .PHONY: init rmm tf-a edk2 linux buildroot qemu virt-disk run
