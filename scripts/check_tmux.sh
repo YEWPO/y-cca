@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 
 if [ -z "$TMUX" ]; then
-  echo "You're not in a tmux session."
-  tmux new-session
-  tmux send-keys -t 0 "cd $1" C-m
-  tmux send-keys "make -C $1 run-only" C-m
+  tmux new-session -s "Run Arm CCA" -d
+  tmux send-keys -t "Run Arm CCA" "make run-only" C-m
+  tmux attach-session -t "Run Arm CCA"
 else
-  cd $1
   make run-only
 fi

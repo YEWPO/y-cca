@@ -81,7 +81,7 @@ run-only:
 	tmux select-window -l
 
 run:
-	$(SCRIPTS_DIR)/check_tmux.sh $(ROOT_DIR)
+	$(SCRIPTS_DIR)/check_tmux.sh
 
 # Clone needed repositories and install dependencies
 init:

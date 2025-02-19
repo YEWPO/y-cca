@@ -2,9 +2,15 @@
 
 tmux new-window -n 'Arm CCA'
 
-tmux split-window -v
-tmux split-window -h -t 0
-tmux split-window -h -t 1
+if [ ! -d $HOME/.tmux ]; then
+  tmux split-window -v
+  tmux split-window -h -t 0
+  tmux split-window -h -t 2
+else
+  tmux split-window -v
+  tmux split-window -h -t 1
+  tmux split-window -h -t 3
+fi
 
 if [ ! -d $HOME/.tmux ]; then
   tmux send-keys -t 0 'socat -,rawer TCP-LISTEN:54320' C-m
