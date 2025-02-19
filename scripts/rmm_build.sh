@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-export PACKAGES_PATH=$PWD/edk2:$PWD/edk2-platforms:$PWD/edk2-non-osi
-export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
-. edk2/edksetup.sh
-make -C edk2/BaseTools
-build -b RELEASE -a AARCH64 -t GCC5 -D ENABLE_RME --pcd PcdUefiShellDefaultBootEnable=1 \
-    --pcd PcdShellDefaultDelay=0 -p edk2-platforms/Platform/Qemu/SbsaQemu/SbsaQemu.dsc
+ROOT_DIR=$(pwd)
+RMM_DIR=${ROOT_DIR}/rmm
+
+export CROSS_COMPILE=aarch64-linux-gnu-
+cmake -DCMAKE_BUILD_TYPE=Debug -DRMM_CONFIG=qemu_sbsa_defcfg -B build-sbsa
+cmake --build build-sbsa
