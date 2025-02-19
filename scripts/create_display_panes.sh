@@ -20,4 +20,4 @@ fi
 
 tmux select-window -l
 
-sleep 2
+sleep 1

@@ -14,10 +14,11 @@ BUILDROOT_EXTER_DIR = $(ROOT_DIR)/buildroot-external
 QEMU_DIR = $(ROOT_DIR)/qemu
 
 IMAGE_DIR = $(ROOT_DIR)/images
+SCRIPTS_DIR = $(ROOT_DIR)/scripts
 
 # Build the Softwares
 rmm:
-	./scripts/rmm_build.sh
+	$(SCRIPTS_DIR)/rmm_build.sh
 	cp $(RMM_DIR)/build-sbsa/Debug/rmm.img $(IMAGE_DIR)
 
 tf-a: rmm
@@ -29,7 +30,7 @@ tf-a: rmm
 	cp $(TF_A_DIR)/build/qemu_sbsa/debug/fip.bin $(EDK2_NON_OSI_DIR)/Platform/Qemu/Sbsa/
 
 edk2: tf-a
-	./scripts/edk2_build.sh
+	$(SCRIPTS_DIR)/edk2_build.sh
 	truncate -s 256M Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH0.fd
 	truncate -s 256M Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH1.fd
 	cp Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH0.fd $(IMAGE_DIR)
@@ -49,16 +50,16 @@ buildroot:
 	cp $(BUILDROOT_DIR)/output/images/rootfs.cpio $(IMAGE_DIR)
 
 qemu:
-	./scripts/qemu_build.sh
+	$(SCRIPTS_DIR)/qemu_build.sh
 
 virt-disk: buildroot linux edk2
 	cp $(LINUX_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image
-	echo "mode 100 31\npci\nfs0:\Image root=/dev/vda console=hvc0\nreset -c" > $(IMAGE_DIR)/disks/virtual/startup.nsh
+	cp $(SCRIPTS_DIR)/startup.nsh $(IMAGE_DIR)/disks/virtual/startup.nsh
 
 build: virt-disk qemu buildroot
 
 run-only:
-	./scripts/create_display_panes.sh
+	$(SCRIPTS_DIR)/create_display_panes.sh
 	$(QEMU_DIR)/build/qemu-system-aarch64 \
 		-machine sbsa-ref -m 8G \
 		-cpu max,x-rme=on,sme=off,pauth-impdef=on \
@@ -80,10 +81,10 @@ run-only:
 	tmux select-window -l
 
 run:
-	./scripts/check_tmux.sh $(ROOT_DIR)
+	$(SCRIPTS_DIR)/check_tmux.sh $(ROOT_DIR)
 
 # Clone needed repositories and install dependencies
 init:
-	./scripts/init.sh
+	$(SCRIPTS_DIR)/init.sh
 
 .PHONY: init rmm tf-a edk2 linux buildroot qemu virt-disk run
