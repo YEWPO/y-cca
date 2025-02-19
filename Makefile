@@ -56,6 +56,8 @@ virt-disk: buildroot linux edk2
 	echo "mode 100 31\npci\nfs0:\Image root=/dev/vda console=hvc0\nreset -c" > $(IMAGE_DIR)/disks/virtual/startup.nsh
 
 build: virt-disk qemu buildroot
+
+startup:
 	./scripts/create_display_panes.sh
 	$(QEMU_DIR)/build/qemu-system-aarch64 \
 		-machine sbsa-ref -m 8G \
