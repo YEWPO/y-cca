@@ -19,13 +19,13 @@ SCRIPTS_DIR = $(ROOT_DIR)/scripts
 # Build the Softwares
 rmm:
 	$(SCRIPTS_DIR)/rmm_build.sh
-	cp $(RMM_DIR)/build-sbsa/Debug/rmm.img $(IMAGE_DIR)
+	cp $(RMM_DIR)/build/Debug/rmm.img $(IMAGE_DIR)
 
 tf-a: rmm
 	make -C $(TF_A_DIR) \
 		CROSS_COMPILE=aarch64-linux-gnu- PLAT=qemu_sbsa \
 		ENABLE_RME=1 RME_GPT_BITLOCK_BLOCK=1 DEBUG=1 LOG_LEVEL=40 \
-		RMM=$(RMM_DIR)/build-sbsa/Debug/rmm.img all fip
+		RMM=$(RMM_DIR)/build/Debug/rmm.img all fip
 	cp $(TF_A_DIR)/build/qemu_sbsa/debug/bl1.bin $(EDK2_NON_OSI_DIR)/Platform/Qemu/Sbsa/
 	cp $(TF_A_DIR)/build/qemu_sbsa/debug/fip.bin $(EDK2_NON_OSI_DIR)/Platform/Qemu/Sbsa/
 
