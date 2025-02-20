@@ -2,7 +2,7 @@
 
 An Arm CCA Architecture with **Planes** feature.
 
-## Tools
+## 🛠️ Tools
 
 Make sure that all the following tools are installed on your local:
 
@@ -14,12 +14,21 @@ Make sure that all the following tools are installed on your local:
 - flex, bison
 - make, cmake, ninja (debian ninja-build), curl, rsync
 - tmux
-- aarch64 cross compilers
-- socat
+- aarch64 crossing-compilers
 
-## Install
+## 📌 Install
 
-First, clone this repository to your local.
+> ❗ Make sure you have **at least 40G** of disk space. After the compilation is complete, 25G of disk space will be consumed.
+
+The deployment architecture is shown as the following figure:
+
+<img src="https://raw.githubusercontent.com/YEWPO/yewpoblogonlinePic/main/cca-deploy.png" alt="cca-deploy" width=450px />
+
+First, clone this repository to your local:
+
+```shell
+git clone https://github.com/YEWPO/y-cca.git
+```
 
 All dependencies list in `scripts/init.sh`, you can edit it when necessary.
 
@@ -29,11 +38,13 @@ Download dependencies by execute:
 make init
 ```
 
-Build all dependencies by execute:
+Build all dependencies by execute (If you modified the codes, re-run this command is necessary):
 
 ```shell
 make build
 ```
+
+## 🚀 Launching System and Realm Guest
 
 Run the CCA system by execute:
 
@@ -41,9 +52,7 @@ Run the CCA system by execute:
 make run
 ```
 
-## Launching Realm Guest
-
-We created scripts for QEMU and LKVM to launch Realm Guest.
+We created scripts for QEMU and LKVM to launch Realm Guest, you can use it to launch guest.
 
 Launching Realm Guest by QEMU:
 
@@ -57,3 +66,7 @@ Launching Realm Guest by LKVM:
 /mnt/scripts/lkvm_realm.sh
 ```
 
+## 🔗 Code Base
+
+- Our RMM based on [Linaro RMM](https://git.codelinaro.org/linaro/dcap/rmm), branch `cca/v4`.
+- Our Linux based on [Linaro linux-cca](https://gitlab.arm.com/linux-arm/linux-cca), branch `cca-full/v5+v7`.
