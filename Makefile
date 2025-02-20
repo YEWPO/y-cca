@@ -16,6 +16,8 @@ QEMU_DIR = $(ROOT_DIR)/qemu
 IMAGE_DIR = $(ROOT_DIR)/images
 SCRIPTS_DIR = $(ROOT_DIR)/scripts
 
+QEMU_BIN = $(QEMU_DIR)/build/qemu-system-aarch64
+
 # Build the Softwares
 rmm:
 	$(SCRIPTS_DIR)/rmm_build.sh
@@ -49,8 +51,10 @@ buildroot:
 	cp $(BUILDROOT_DIR)/output/images/rootfs.ext4 $(IMAGE_DIR)
 	cp $(BUILDROOT_DIR)/output/images/rootfs.cpio $(IMAGE_DIR)
 
-qemu:
+$(QEMU_BIN):
 	$(SCRIPTS_DIR)/qemu_build.sh
+
+qemu: $(QEMU_BIN)
 
 virt-disk: buildroot linux edk2
 	cp $(LINUX_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image
@@ -60,7 +64,7 @@ build: virt-disk qemu buildroot
 
 run-only:
 	$(SCRIPTS_DIR)/create_display_panes.sh
-	$(QEMU_DIR)/build/qemu-system-aarch64 \
+	$(QEMU_BIN) \
 		-machine sbsa-ref -m 8G \
 		-cpu max,x-rme=on,sme=off,pauth-impdef=on \
 		-drive file=$(IMAGE_DIR)/SBSA_FLASH0.fd,format=raw,if=pflash \
