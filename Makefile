@@ -18,9 +18,11 @@ SCRIPTS_DIR = $(ROOT_DIR)/scripts
 
 QEMU_BIN = $(QEMU_DIR)/build/qemu-system-aarch64
 
+RMM_V1_1 ?= OFF
+
 # Build the Softwares
 rmm:
-	$(SCRIPTS_DIR)/rmm_build.sh
+	$(SCRIPTS_DIR)/rmm_build.sh $(RMM_V1_1)
 	cp $(RMM_DIR)/build/Debug/rmm.img $(IMAGE_DIR)
 
 tf-a: rmm

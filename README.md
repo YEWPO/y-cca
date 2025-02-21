@@ -44,6 +44,12 @@ Build all dependencies by execute (If you modified the codes, re-run this comman
 make build
 ```
 
+By default, the RMM version is v1.0. To build RMM v1.1, execute:
+
+```shell
+make build RMM_V1_1=ON
+```
+
 ## 🚀 Launching System and Realm Guest
 
 Run the CCA system by execute:
