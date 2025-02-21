@@ -74,4 +74,4 @@ git_clone https://github.com/tianocore/edk2.git                                 
 git_clone https://github.com/YEWPO/y-linux-cca.git                                        linux               master          true      false
 git_clone https://github.com/YEWPO/y-buildroot.git                                        buildroot-external  master          false     false
 git_clone https://gitlab.com/buildroot.org/buildroot.git                                  buildroot           master          true      false
-git_clone https://gitlab.com/qemu-project/qemu.git                                        qemu                master          true      false
+git_clone https://github.com/qemu/qemu.git                                                qemu                stable-9.2      true      false
