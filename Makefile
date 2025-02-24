@@ -65,6 +65,8 @@ virt-disk: buildroot linux edk2
 build: virt-disk qemu buildroot
 
 run-only:
+	-pkill -f "qemu-system-aarch64"
+	-tmux kill-window -t "Arm CCA"
 	$(SCRIPTS_DIR)/create_display_panes.sh
 	$(QEMU_BIN) \
 		-machine sbsa-ref -m 8G \
