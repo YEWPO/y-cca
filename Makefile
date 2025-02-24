@@ -83,7 +83,8 @@ run-only:
 		-device virtio-serial-pci \
 		-device virtconsole,chardev=hvc1 \
 		-device virtio-9p-pci,fsdev=shr0,mount_tag=shr0 \
-		-fsdev local,security_model=none,path=$(ROOT_DIR),id=shr0 &
+		-fsdev local,security_model=none,path=$(ROOT_DIR),id=shr0 \
+		-nographic &
 	tmux select-window -l
 
 run:
