@@ -2,7 +2,7 @@
 
 An Arm CCA Architecture with **Planes** feature.
 
-## 🛠️ Tools
+## 🛠️  Tools
 
 Make sure that all the following tools are installed on your local:
 
@@ -60,7 +60,7 @@ make run
 
 We created scripts for QEMU and LKVM to launch Realm Guest, you can use it to launch guest.
 
-Launching Realm Guest by QEMU:
+Launching Realm Guest by QEMU (❗ Do not support Planes Feature currently):
 
 ```shell
 /mnt/scripts/qemu_realm.sh
@@ -71,6 +71,8 @@ Launching Realm Guest by LKVM:
 ```shell
 /mnt/scripts/lkvm_realm.sh
 ```
+
+In order to debug the exception simply, you can modify the `lkvm_realm.sh` script to change the `-c 2` to `-c 1`.
 
 ## 🔗 Code Base
 
