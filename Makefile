@@ -8,7 +8,7 @@ TF_A_DIR = $(ROOT_DIR)/trusted-firmware-a
 EDK2_DIR = $(ROOT_DIR)/edk2
 EDK2_PLAT_DIR = $(ROOT_DIR)/edk2-platforms
 EDK2_NON_OSI_DIR = $(ROOT_DIR)/edk2-non-osi
-LINUX_DIR = $(ROOT_DIR)/linux
+LINUX_HOST_DIR = $(ROOT_DIR)/linux-host
 BUILDROOT_DIR = $(ROOT_DIR)/buildroot
 BUILDROOT_EXTER_DIR = $(ROOT_DIR)/buildroot-external
 QEMU_DIR = $(ROOT_DIR)/qemu
@@ -27,7 +27,7 @@ rmm:
 
 tf-a: rmm
 	make -C $(TF_A_DIR) \
-		CROSS_COMPILE=aarch64-linux-gnu- PLAT=qemu_sbsa \
+		CROSS_COMPILE=aarch64-linux-host-gnu- PLAT=qemu_sbsa \
 		ENABLE_RME=1 RME_GPT_BITLOCK_BLOCK=1 DEBUG=1 LOG_LEVEL=40 \
 		RMM=$(RMM_DIR)/build/Debug/rmm.img all fip
 	cp $(TF_A_DIR)/build/qemu_sbsa/debug/bl1.bin $(EDK2_NON_OSI_DIR)/Platform/Qemu/Sbsa/
@@ -40,12 +40,12 @@ edk2: tf-a
 	cp Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH0.fd $(IMAGE_DIR)
 	cp Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH1.fd $(IMAGE_DIR)
 
-linux:
-	make -C $(LINUX_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) defconfig
-	$(LINUX_DIR)/scripts/config -e VIRT_DRIVERS -e ARM_CCA_GUEST -e CONFIG_HZ_100 \
+linux-host:
+	make -C $(LINUX_HOST_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) defconfig
+	$(LINUX_HOST_DIR)/scripts/config -e VIRT_DRIVERS -e ARM_CCA_GUEST -e CONFIG_HZ_100 \
 		-d CONFIG_HZ_250 -e CONFIG_MACVLAN -e CONFIG_MACVTAP \
 		-e VMGENID -d NITRO_ENCLAVES -d ARM_PKVM_GUEST
-	make -C $(LINUX_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) -j$(THREADS) Image
+	make -C $(LINUX_HOST_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) -j$(THREADS) Image
 
 buildroot:
 	make -C $(BUILDROOT_DIR) BR2_EXTERNAL=$(BUILDROOT_EXTER_DIR) cca_defconfig
@@ -58,8 +58,8 @@ $(QEMU_BIN):
 
 qemu: $(QEMU_BIN)
 
-virt-disk: buildroot linux edk2
-	cp $(LINUX_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image
+virt-disk: buildroot linux-host edk2
+	cp $(LINUX_HOST_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image-host
 	cp $(SCRIPTS_DIR)/startup.nsh $(IMAGE_DIR)/disks/virtual/startup.nsh
 
 build: virt-disk qemu buildroot
@@ -96,4 +96,4 @@ run:
 init:
 	$(SCRIPTS_DIR)/init.sh
 
-.PHONY: init rmm tf-a edk2 linux buildroot qemu virt-disk run
+.PHONY: init rmm tf-a edk2 linux-host buildroot qemu virt-disk run

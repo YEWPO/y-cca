@@ -6,7 +6,7 @@ qemu-system-aarch64 \
   -device virtio-serial-pci \
   -device virtconsole,chardev=virtiocon0 \
   -mon chardev=virtiocon0,mode=readline \
-  -kernel /mnt/images/disks/virtual/Image \
+  -kernel /mnt/images/disks/virtual/Image-host \
   -initrd /mnt/images/rootfs.cpio \
   -device virtio-net-pci,netdev=net0,romfile= \
   -netdev user,id=net0 \
