@@ -9,6 +9,7 @@ EDK2_DIR = $(ROOT_DIR)/edk2
 EDK2_PLAT_DIR = $(ROOT_DIR)/edk2-platforms
 EDK2_NON_OSI_DIR = $(ROOT_DIR)/edk2-non-osi
 LINUX_HOST_DIR = $(ROOT_DIR)/linux-host
+LINUX_GUEST_DIR = $(ROOT_DIR)/linux-guest
 BUILDROOT_DIR = $(ROOT_DIR)/buildroot
 BUILDROOT_EXTER_DIR = $(ROOT_DIR)/buildroot-external
 QEMU_DIR = $(ROOT_DIR)/qemu
@@ -17,6 +18,7 @@ IMAGE_DIR = $(ROOT_DIR)/images
 SCRIPTS_DIR = $(ROOT_DIR)/scripts
 
 QEMU_BIN = $(QEMU_DIR)/build/qemu-system-aarch64
+ROOTFS = $(BUILDROOT_DIR)/output/images/rootfs.ext4
 
 RMM_V1_1 ?= OFF
 
@@ -47,19 +49,30 @@ linux-host:
 		-e VMGENID -d NITRO_ENCLAVES -d ARM_PKVM_GUEST
 	make -C $(LINUX_HOST_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) -j$(THREADS) Image
 
-buildroot:
+linux-guest:
+	make -C $(LINUX_GUEST_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) defconfig
+	$(LINUX_GUEST_DIR)/scripts/config -e VIRT_DRIVERS -e ARM_CCA_GUEST -e CONFIG_HZ_100 \
+		-d CONFIG_HZ_250 -e CONFIG_MACVLAN -e CONFIG_MACVTAP \
+		-e VMGENID -d NITRO_ENCLAVES -d ARM_PKVM_GUEST -d RANDOMIZE_BASE
+	make -C $(LINUX_GUEST_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) -j$(THREADS) Image
+
+$(ROOTFS):
 	make -C $(BUILDROOT_DIR) BR2_EXTERNAL=$(BUILDROOT_EXTER_DIR) cca_defconfig
 	make -C $(BUILDROOT_DIR) -j$(THREADS)
-	cp $(BUILDROOT_DIR)/output/images/rootfs.ext4 $(IMAGE_DIR)
-	cp $(BUILDROOT_DIR)/output/images/rootfs.cpio $(IMAGE_DIR)
 
 $(QEMU_BIN):
 	$(SCRIPTS_DIR)/qemu_build.sh
 
 qemu: $(QEMU_BIN)
 
-virt-disk: buildroot linux-host edk2
+buildroot: $(ROOTFS)
+
+virt-disk: buildroot linux-host linux-guest edk2
 	cp $(LINUX_HOST_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image-host
+	cp $(LINUX_GUEST_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image-guest
+	cp $(BUILDROOT_DIR)/output/images/rootfs.ext4 $(IMAGE_DIR)/rootfs-host.ext4
+	cp $(BUILDROOT_DIR)/output/images/rootfs.ext4 $(IMAGE_DIR)/rootfs-guest.ext4
+	cp $(BUILDROOT_DIR)/output/images/rootfs.cpio $(IMAGE_DIR)/rootfs.cpio
 	cp $(SCRIPTS_DIR)/startup.nsh $(IMAGE_DIR)/disks/virtual/startup.nsh
 
 build: virt-disk qemu buildroot
@@ -74,7 +87,7 @@ run-only:
 		-drive file=$(IMAGE_DIR)/SBSA_FLASH0.fd,format=raw,if=pflash \
 		-drive file=$(IMAGE_DIR)/SBSA_FLASH1.fd,format=raw,if=pflash \
 		-drive file=fat:rw:$(IMAGE_DIR)/disks/virtual,format=raw \
-		-drive format=raw,if=none,file=$(BUILDROOT_DIR)/output/images/rootfs.ext4,id=hd0 \
+		-drive format=raw,if=none,file=$(IMAGE_DIR)/rootfs-host.ext4,id=hd0 \
 		-device virtio-blk-pci,drive=hd0 \
 		-serial tcp:localhost:54320 \
 		-serial tcp:localhost:54321 \
@@ -96,4 +109,4 @@ run:
 init:
 	$(SCRIPTS_DIR)/init.sh
 
-.PHONY: init rmm tf-a edk2 linux-host buildroot qemu virt-disk run
+.PHONY: init rmm tf-a edk2 linux-host linux-guest buildroot qemu virt-disk run
