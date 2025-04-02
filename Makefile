@@ -29,7 +29,7 @@ rmm:
 
 tf-a: rmm
 	make -C $(TF_A_DIR) \
-		CROSS_COMPILE=aarch64-linux-host-gnu- PLAT=qemu_sbsa \
+		CROSS_COMPILE=$(CROSS_COMPILE) PLAT=qemu_sbsa \
 		ENABLE_RME=1 RME_GPT_BITLOCK_BLOCK=1 DEBUG=1 LOG_LEVEL=40 \
 		RMM=$(RMM_DIR)/build/Debug/rmm.img all fip
 	cp $(TF_A_DIR)/build/qemu_sbsa/debug/bl1.bin $(EDK2_NON_OSI_DIR)/Platform/Qemu/Sbsa/
@@ -43,18 +43,10 @@ edk2: tf-a
 	cp Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH1.fd $(IMAGE_DIR)
 
 linux-host:
-	make -C $(LINUX_HOST_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) defconfig
-	$(LINUX_HOST_DIR)/scripts/config -e VIRT_DRIVERS -e ARM_CCA_GUEST -e CONFIG_HZ_100 \
-		-d CONFIG_HZ_250 -e CONFIG_MACVLAN -e CONFIG_MACVTAP \
-		-e VMGENID -d NITRO_ENCLAVES -d ARM_PKVM_GUEST
-	make -C $(LINUX_HOST_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) -j$(THREADS) Image
+	$(SCRIPTS_DIR)/linux-host_build.sh $(CROSS_COMPILE) $(THREADS)
 
 linux-guest:
-	make -C $(LINUX_GUEST_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) defconfig
-	$(LINUX_GUEST_DIR)/scripts/config -e VIRT_DRIVERS -e ARM_CCA_GUEST -e CONFIG_HZ_100 \
-		-d CONFIG_HZ_250 -e CONFIG_MACVLAN -e CONFIG_MACVTAP \
-		-e VMGENID -d NITRO_ENCLAVES -d ARM_PKVM_GUEST -d RANDOMIZE_BASE
-	make -C $(LINUX_GUEST_DIR) ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE) -j$(THREADS) Image
+	$(SCRIPTS_DIR)/linux-guest_build.sh $(CROSS_COMPILE) $(THREADS)
 
 $(ROOTFS):
 	make -C $(BUILDROOT_DIR) BR2_EXTERNAL=$(BUILDROOT_EXTER_DIR) cca_defconfig
