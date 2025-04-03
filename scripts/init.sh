@@ -70,9 +70,14 @@ git_clone https://github.com/YEWPO/y-rmm.git                                    
 git_clone https://github.com/tianocore/edk2-non-osi.git                                   edk2-non-osi        master          false     false
 git_clone https://git.codelinaro.org/linaro/dcap/tf-a/trusted-firmware-a.git              trusted-firmware-a  cca/v4          false     false
 git_clone https://github.com/tianocore/edk2-platforms.git                                 edk2-platforms      master          false     true
-git_clone https://github.com/tianocore/edk2.git                                           edk2                master          false     true
-git_clone https://github.com/YEWPO/y-linux-cca.git                                        linux-host          master          false     false
-git_clone https://github.com/YEWPO/y-linux-cca.git                                        linux-guest         master          false     false
-git_clone https://github.com/YEWPO/y-buildroot.git                                        buildroot-external  master          false     false
-git_clone https://gitlab.com/buildroot.org/buildroot.git                                  buildroot           master          true      false
+git_clone https://github.com/tianocore/edk2.git                                           edk2-host           master          true      true
+
+git_clone https://git.gitlab.arm.com/linux-arm/linux-cca.git                              linux-host          cca-host/v7          true      false
+git_clone https://gitlab.com/buildroot.org/buildroot.git                                  buildroot-host      master          true      false
+git_clone https://git.codelinaro.org/linaro/dcap/buildroot-external-cca.git               buildroot-external  main            true      false
+
+git_clone https://git.codelinaro.org/linaro/dcap/edk2.git                                 edk2-guest          cca/latest      true      true
+git_clone https://github.com/torvalds/linux.git                                           linux-guest         v6.13           true      false
+git_clone https://gitlab.com/buildroot.org/buildroot.git                                  buildroot-guest     master          true      false
+
 git_clone https://github.com/qemu/qemu.git                                                qemu                stable-9.2      true      false
