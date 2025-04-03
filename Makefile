@@ -5,20 +5,23 @@ THREADS ?= $(shell nproc)
 
 RMM_DIR = $(ROOT_DIR)/rmm
 TF_A_DIR = $(ROOT_DIR)/trusted-firmware-a
-EDK2_DIR = $(ROOT_DIR)/edk2
+EDK2_HOST_DIR = $(ROOT_DIR)/edk2-host
 EDK2_PLAT_DIR = $(ROOT_DIR)/edk2-platforms
 EDK2_NON_OSI_DIR = $(ROOT_DIR)/edk2-non-osi
+
 LINUX_HOST_DIR = $(ROOT_DIR)/linux-host
-LINUX_GUEST_DIR = $(ROOT_DIR)/linux-guest
-BUILDROOT_DIR = $(ROOT_DIR)/buildroot
+BUILDROOT_HOST_DIR = $(ROOT_DIR)/buildroot-host
 BUILDROOT_EXTER_DIR = $(ROOT_DIR)/buildroot-external
+
+EDK2_GUEST_DIR = $(ROOT_DIR)/edk2-guest
+LINUX_GUEST_DIR = $(ROOT_DIR)/linux-guest
+BUILDROOT_GUEST_DIR = $(ROOT_DIR)/buildroot-guest
 QEMU_DIR = $(ROOT_DIR)/qemu
 
 IMAGE_DIR = $(ROOT_DIR)/images
 SCRIPTS_DIR = $(ROOT_DIR)/scripts
 
 QEMU_BIN = $(QEMU_DIR)/build/qemu-system-aarch64
-ROOTFS = $(BUILDROOT_DIR)/output/images/rootfs.ext4
 
 RMM_V1_1 ?= OFF
 
@@ -35,39 +38,44 @@ tf-a: rmm
 	cp $(TF_A_DIR)/build/qemu_sbsa/debug/bl1.bin $(EDK2_NON_OSI_DIR)/Platform/Qemu/Sbsa/
 	cp $(TF_A_DIR)/build/qemu_sbsa/debug/fip.bin $(EDK2_NON_OSI_DIR)/Platform/Qemu/Sbsa/
 
-edk2: tf-a
-	$(SCRIPTS_DIR)/edk2_build.sh
-	truncate -s 256M Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH0.fd
-	truncate -s 256M Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH1.fd
-	cp Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH0.fd $(IMAGE_DIR)
-	cp Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH1.fd $(IMAGE_DIR)
+edk2-host: tf-a
+	$(SCRIPTS_DIR)/edk2_host_build.sh $(CROSS_COMPILE)
+	truncate -s 256M $(EDK2_HOST_DIR)/Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH0.fd
+	truncate -s 256M $(EDK2_HOST_DIR)/Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH1.fd
+	cp $(EDK2_HOST_DIR)/Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH0.fd $(IMAGE_DIR)
+	cp $(EDK2_HOST_DIR)/Build/SbsaQemuRme/RELEASE_GCC5/FV/SBSA_FLASH1.fd $(IMAGE_DIR)
 
 linux-host:
-	$(SCRIPTS_DIR)/linux-host_build.sh $(CROSS_COMPILE) $(THREADS)
+	$(SCRIPTS_DIR)/linux_host_build.sh $(CROSS_COMPILE)
+
+buildroot-host:
+	make -C $(BUILDROOT_HOST_DIR) BR2_EXTERNAL=$(BUILDROOT_EXTER_DIR) cca_defconfig
+	make -C $(BUILDROOT_HOST_DIR) -j$(THREADS)
+
+edk2-guest:
+	$(SCRIPTS_DIR)/edk2_guest_build.sh $(CROSS_COMPILE)
 
 linux-guest:
-	$(SCRIPTS_DIR)/linux-guest_build.sh $(CROSS_COMPILE) $(THREADS)
+	$(SCRIPTS_DIR)/linux_guest_build.sh $(CROSS_COMPILE)
 
-$(ROOTFS):
-	make -C $(BUILDROOT_DIR) BR2_EXTERNAL=$(BUILDROOT_EXTER_DIR) cca_defconfig
-	make -C $(BUILDROOT_DIR) -j$(THREADS)
+buildroot-guest: linux-guest
+	mkdir -p $(BUILDROOT_GUEST_DIR)/output/images
+	cp $(LINUX_GUEST_DIR)/arch/arm64/boot/Image ${BUILDROOT_GUEST_DIR}/output/images/Image
+	make -C $(BUILDROOT_GUEST_DIR) aarch64_efi_defconfig
+	make -C $(BUILDROOT_GUEST_DIR) -j$(THREADS)
 
 $(QEMU_BIN):
 	$(SCRIPTS_DIR)/qemu_build.sh
 
 qemu: $(QEMU_BIN)
 
-buildroot: $(ROOTFS)
-
-virt-disk: buildroot linux-host linux-guest edk2
-	cp $(LINUX_HOST_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image-host
-	cp $(LINUX_GUEST_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image-guest
-	cp $(BUILDROOT_DIR)/output/images/rootfs.ext4 $(IMAGE_DIR)/rootfs-host.ext4
-	cp $(BUILDROOT_DIR)/output/images/rootfs.ext4 $(IMAGE_DIR)/rootfs-guest.ext4
-	cp $(BUILDROOT_DIR)/output/images/rootfs.cpio $(IMAGE_DIR)/rootfs.cpio
+virt-disk: buildroot-host linux-host edk2-host
+	cp $(LINUX_HOST_DIR)/arch/arm64/boot/Image $(IMAGE_DIR)/disks/virtual/Image
+	cp $(BUILDROOT_HOST_DIR)/output/images/rootfs.ext4 $(IMAGE_DIR)/rootfs.ext4
+	cp $(BUILDROOT_HOST_DIR)/output/images/rootfs.cpio $(IMAGE_DIR)/rootfs.cpio
 	cp $(SCRIPTS_DIR)/startup.nsh $(IMAGE_DIR)/disks/virtual/startup.nsh
 
-build: virt-disk qemu buildroot
+build: virt-disk qemu buildroot-host buildroot-guest edk2-guest
 
 run-only:
 	-pkill -f "qemu-system-aarch64"
@@ -79,7 +87,7 @@ run-only:
 		-drive file=$(IMAGE_DIR)/SBSA_FLASH0.fd,format=raw,if=pflash \
 		-drive file=$(IMAGE_DIR)/SBSA_FLASH1.fd,format=raw,if=pflash \
 		-drive file=fat:rw:$(IMAGE_DIR)/disks/virtual,format=raw \
-		-drive format=raw,if=none,file=$(IMAGE_DIR)/rootfs-host.ext4,id=hd0 \
+		-drive format=raw,if=none,file=$(IMAGE_DIR)/rootfs.ext4,id=hd0 \
 		-device virtio-blk-pci,drive=hd0 \
 		-serial tcp:localhost:54320 \
 		-serial tcp:localhost:54321 \
@@ -101,4 +109,4 @@ run:
 init:
 	$(SCRIPTS_DIR)/init.sh
 
-.PHONY: init rmm tf-a edk2 linux-host linux-guest buildroot qemu virt-disk run
+.PHONY: init rmm tf-a edk2-host edk2-guest linux-host linux-guest buildroot-host buildroot-guest qemu virt-disk run

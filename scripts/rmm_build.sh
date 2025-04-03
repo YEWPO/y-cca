@@ -10,7 +10,7 @@ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
   -DRMM_V1_1=$1 \
   -B build
 
-cmake --build build
+cmake --build build -j$(nproc)
 
 if [ $? -ne 0 ]; then
   exit 1
